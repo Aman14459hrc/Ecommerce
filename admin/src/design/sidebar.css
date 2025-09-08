@@ -1,0 +1,40 @@
+/* Sidebar container */
+.sidebar {
+  width: 220px;
+  min-height: 100vh;
+  background-color: #f4f4f4;
+  padding: 20px 10px;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+}
+
+/* NavLink container */
+.sidebar a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #333;
+  text-decoration: none;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+/* Active link and hover styles */
+.sidebar a:hover,
+.sidebar a.active {
+  background-color: #b3acac;
+}
+
+/* Image styles */
+.sidebar img {
+  width: 24px;
+  height: 24px;
+}
+
+/* Text label */
+.sidebar p {
+  margin: 0;
+  font-size: 16px;
+  text-transform: capitalize;
+}

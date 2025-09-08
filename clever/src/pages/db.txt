@@ -1,0 +1,18 @@
+{
+  "orderId": "AF58D9C3",
+  "user": "userId123",
+  "address": { "name": "Aman", "city": "Delhi", "pincode": "110001" },
+  "items": [
+    {
+      "productId": "abc123",
+      "size": "M",
+      "quantity": 2
+    }
+  ],
+  "paymentMethod": "COD",
+  "totalAmount": 1099,
+  "status": "Ordered",
+  "timestamps": {
+    "ordered": "2025-07-09T10:30:00Z"
+  }
+}
