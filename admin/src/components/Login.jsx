@@ -15,12 +15,13 @@ function Login({ setToken }) {
     e.preventDefault();
 
     try {
-      const response = await axios.post(`${backendurl}/api/users/login`, { email, password });
+      const response = await axios.post(`${backendurl}/api/users/admin`, { email, password });
 
-      if (response.data.Token) {
-        const token = response.data.Token; // Match backend response
+      if (response.data.token) {
+        const token = response.data.token; // Match backend response
         setToken(token);
         localStorage.setItem("token", token);
+        console.log("Login successful:", response.data, token);
 
         toast.success("Login successful!");
         navigate("/add"); // Redirect to /add after login

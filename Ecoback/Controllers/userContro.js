@@ -72,8 +72,20 @@ const loginUser = async (req, res) => {
         cartData: user.cartData,
         address: user.address,
         phone: user.phone
-      }
+      },token,
     });
+    // res.json({
+    //   msg: "Login successful",
+    //   user: {
+    //     id: user._id,
+    //     name: user.name,
+    //     email: user.email,
+    //     isAdmin: user.isAdmin,
+    //     address: user.address,
+    //     phone: user.phone,
+    //   },
+    //   token,  // ✅ always return this
+    // });
   } catch (error) {
     res.status(500).json({ msg: "Login failed", error: error.message });
   }

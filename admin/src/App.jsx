@@ -15,6 +15,7 @@ import './App.css'; // CSS import
 
  
 import { ToastContainer, toast } from 'react-toastify';
+import SingleProduct from './pages/Single';
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem("token") || "");
@@ -40,6 +41,7 @@ useEffect(()=>{
   <Route path="/add" element={<Add token={token} />} />
   <Route path="/list" element={<List token={token} />} />
   <Route path="/order" element={<Order token={token} />} />
+  <Route path="/order/:id" element={<SingleProduct token={token} />} />
 </Routes>
 
         </div>

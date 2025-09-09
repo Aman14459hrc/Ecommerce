@@ -1,120 +1,106 @@
-import React, { useState } from 'react'
-import { assets } from '../assets/assets'
-import '../design/add.css'
-import axios from "axios"
-import { backendurl } from "../App.jsx"
-import { toast } from 'react-toastify'
+import React, { useState } from 'react';
+import { assets } from '../assets/assets';
+import '../design/add.css';
+import axios from "axios";
+import { backendurl } from "../App.jsx";
+import { toast } from 'react-toastify';
 
 const Add = ({ token }) => {
+  const [images, setImages] = useState({ image1: null, image2: null, image3: null, image4: null });
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("men");
+  const [subcategory, setSubcategory] = useState("topwear");
+  const [price, setPrice] = useState("");
+  const [size, setSize] = useState([]); // array of selected sizes
+  const [bestseller, setBestseller] = useState(false);
 
-  const [image1, setimage1] = useState("")
-  const [image2, setimage2] = useState("")
-  const [image3, setimage3] = useState("")
-  const [image4, setimage4] = useState("")
+  const handleImageChange = (e, key) => {
+    setImages(prev => ({ ...prev, [key]: e.target.files[0] }));
+  };
 
-  const [name, setname] = useState("")
-  const [description, setdescription] = useState("")
-  const [category, setcategory] = useState("")
-  const [subcategory, setsubcategory] = useState("")
-  const [price, setprice] = useState("")
-  const [size, setsize] = useState([]); // ✅ start with empty array
-  const [bestseller, setbestseller] = useState(false)
+  const onSubmitHandler = async (e) => {
+    e.preventDefault();
 
+    try {
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("description", description);
+      formData.append("category", category);
+      formData.append("subcategory", subcategory);
+      formData.append("price", price);
+      formData.append("size", JSON.stringify(size));
+      formData.append("bestseller", bestseller);
 
+      // append only if file exists
+      Object.keys(images).forEach(key => {
+        if (images[key]) formData.append(key, images[key]);
+      });
 
-const onsubmithandler = async (e) => {
-  e.preventDefault();
-  try {
-    const formdata = new FormData();
-    formdata.append("name", name);
-    formdata.append("description", description);
-    formdata.append("category", category);
-    formdata.append("subcategory", subcategory);
-    formdata.append("price", price);
-    formdata.append("size", JSON.stringify(size)); // ✅ send as JSON array
-    formdata.append("bestseller", bestseller);
+      const response = await axios.post(
+        `${backendurl}/api/products/add`,
+        formData,
+        { headers: { token } }
+      );
 
-    if (image1) formdata.append("image1", image1);
-    if (image2) formdata.append("image2", image2);
-    if (image3) formdata.append("image3", image3);
-    if (image4) formdata.append("image4", image4);
-
-    const response = await axios.post(
-      backendurl + "/api/product/add",
-      formdata,
-      { headers: { token} }
-    );
-
-    if(response.data.success){
-      toast.success(response.data.message)
-
-       setimage1("");
-                setimage2("");
-                setimage3("");
-                setimage4("");
-                setname("");
-                setdescription("");
-                setcategory("men");
-                setsubcategory("topwear");
-                setprice("");
-                setsize([]);
-                setbestseller(false);
-      "make all form data cleared "
+      if (response.data.success) {
+        toast.success("Product added successfully!");
+        // Clear form
+        setImages({ image1: null, image2: null, image3: null, image4: null });
+        setName("");
+        setDescription("");
+        setCategory("men");
+        setSubcategory("topwear");
+        setPrice("");
+        setSize([]);
+        setBestseller(false);
+      } else {
+        toast.error(response.data.msg || "Failed to add product");
+      }
+    } catch (error) {
+      console.error("Error adding product:", error);
+      toast.error("An unexpected error occurred. Please try again.");
     }
-  else {
-                // Handle errors reported by the API (e.g., validation errors)
-                toast.error(response.data.msg || "Failed to add product.");
-            }
+  };
 
-    console.log("Product added successfully:", response.data);
-  } catch (error) {
-            // Handle network errors or server crashes
-            console.error("Error adding product:", error);
-            toast.error("An unexpected error occurred. Please try again.");
-        }
-};
+  const toggleSize = (s) => {
+    setSize(prev => prev.includes(s) ? prev.filter(item => item !== s) : [...prev, s]);
+  };
 
+  const renderImagePreview = (img) => {
+    return img instanceof File ? URL.createObjectURL(img) : assets.upload_area;
+  };
 
   return (
     <div className="add-container">
-      <form action="" onSubmit={onsubmithandler} >
+      <form onSubmit={onSubmitHandler}>
         <h1>Add Item</h1>
 
         <div className="add-form-group">
           <p>Upload images</p>
           <div className="add-upload-area">
-            <label htmlFor="image1">
-              <img src={!image1 ? assets.upload_area : URL.createObjectURL(image1)} alt="" />
-              <input onChange={(e) => setimage1(e.target.files[0])} type="file" id="image1" hidden />
-            </label>
-            <label htmlFor="image2">
-              <img src={!image2 ? assets.upload_area : URL.createObjectURL(image2)} alt="" />
-              <input onChange={(e) => setimage2(e.target.files[0])} type="file" id="image2" hidden />
-            </label>
-            <label htmlFor="image3">
-              <img src={!image3 ? assets.upload_area : URL.createObjectURL(image3)} alt="" />
-              <input onChange={(e) => setimage3(e.target.files[0])} type="file" id="image3" hidden />
-            </label>
-            <label htmlFor="image4">
-              <img src={!image4 ? assets.upload_area : URL.createObjectURL(image4)} alt="" />
-              <input onChange={(e) => setimage4(e.target.files[0])} type="file" id="image4" hidden />
-            </label>
+            {["image1", "image2", "image3", "image4"].map((key) => (
+              <label htmlFor={key} key={key}>
+                <img src={renderImagePreview(images[key])} alt="" />
+                <input type="file" id={key} hidden onChange={(e) => handleImageChange(e, key)} />
+              </label>
+            ))}
           </div>
         </div>
 
         <div className="add-form-group">
           <p>Product Name</p>
-          <input onChange={(e) => setname(e.target.value)} value={name} type="text" />
+          <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
         </div>
 
         <div className="add-form-group">
           <p>Description</p>
-          <textarea onChange={(e) => setdescription(e.target.value)} value={description} placeholder="Write content here" />
+          <textarea placeholder="Write content here" value={description} onChange={(e) => setDescription(e.target.value)} />
         </div>
 
         <div className="add-form-group">
-          <p>Product category</p>
-          <select onChange={(e) => setcategory(e.target.value)} value={category}>
+          <p>Product Category</p>
+          <select value={category} onChange={(e) => setCategory(e.target.value)}>
             <option value="men">Men</option>
             <option value="women">Women</option>
             <option value="kids">Kids</option>
@@ -122,81 +108,34 @@ const onsubmithandler = async (e) => {
         </div>
 
         <div className="add-form-group">
-          <p>Product Sub category</p>
-          <select onChange={(e) => setsubcategory(e.target.value)} value={subcategory}>
+          <p>Product Subcategory</p>
+          <select value={subcategory} onChange={(e) => setSubcategory(e.target.value)}>
             <option value="topwear">Topwear</option>
             <option value="bottomwear">Bottomwear</option>
             <option value="underwear">Underwear</option>
           </select>
         </div>
 
-
         <div className="add-form-group">
-          <p >Product Price</p>
-          <input onChange={(e) => setprice(e.target.value)} value={price} type="number" placeholder="Enter product price" />
+          <p>Product Price</p>
+          <input type="number" placeholder="Enter product price" value={price} onChange={(e) => setPrice(e.target.value)} />
         </div>
 
-        <p >Product Size</p>
+        <p>Product Size</p>
         <div className="size-button-main">
-          <div
-            className={`size-buttons ${size.includes("S") ? "selected" : ""}`}
-            onClick={() =>
-              setsize((prev) =>
-                prev.includes("S") ? prev.filter((item) => item !== "S") : [...prev, "S"]
-              )
-            }
-          >
-            <p>S</p>
-          </div>
-
-          <div
-            className={`size-buttons ${size.includes("M") ? "selected" : ""}`}
-            onClick={() =>
-              setsize((prev) =>
-                prev.includes("M") ? prev.filter((item) => item !== "M") : [...prev, "M"]
-              )
-            }
-          >
-            <p>M</p>
-          </div>
-
-          <div
-            className={`size-buttons ${size.includes("L") ? "selected" : ""}`}
-            onClick={() =>
-              setsize((prev) =>
-                prev.includes("L") ? prev.filter((item) => item !== "L") : [...prev, "L"]
-              )
-            }
-          >
-            <p>L</p>
-          </div>
-
-          <div
-            className={`size-buttons ${size.includes("XL") ? "selected" : ""}`}
-            onClick={() =>
-              setsize((prev) =>
-                prev.includes("XL") ? prev.filter((item) => item !== "XL") : [...prev, "XL"]
-              )
-            }
-          >
-            <p>XL</p>
-          </div>
-
-          <div
-            className={`size-buttons ${size.includes("XXL") ? "selected" : ""}`}
-            onClick={() =>
-              setsize((prev) =>
-                prev.includes("XXL") ? prev.filter((item) => item !== "XXL") : [...prev, "XXL"]
-              )
-            }
-          >
-            <p>XXL</p>
-          </div>
+          {["S", "M", "L", "XL", "XXL"].map(s => (
+            <div
+              key={s}
+              className={`size-buttons ${size.includes(s) ? "selected" : ""}`}
+              onClick={() => toggleSize(s)}
+            >
+              <p>{s}</p>
+            </div>
+          ))}
         </div>
-
 
         <div className="bestseller-container">
-          <input onChange={() => setbestseller(prev => !prev)} checked={bestseller} type="checkbox" name="" id="bestseller" />
+          <input type="checkbox" id="bestseller" checked={bestseller} onChange={() => setBestseller(prev => !prev)} />
           <label htmlFor="bestseller">Add to BestSeller</label>
         </div>
 
@@ -206,8 +145,7 @@ const onsubmithandler = async (e) => {
 
       </form>
     </div>
+  );
+};
 
-  )
-}
-
-export default Add
+export default Add;
