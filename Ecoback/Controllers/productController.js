@@ -34,13 +34,20 @@ const addProduct = async (req, res) => {
     }
 
     // 🔹 Build Product data
+    let parsedSizes = [];
+    try {
+      parsedSizes = JSON.parse(size || "[]");
+    } catch {
+      parsedSizes = [];
+    }
+
     const productData = {
       name,
       description,
       price: Number(price),
       category,
       subcategory,
-      sizes: JSON.parse(size || "[]"), // fallback empty array
+      sizes: parsedSizes,
       Bestseller: bestseller === "true" ? true : false, 
       image: imageURLs,
       date: Date.now()
@@ -86,7 +93,12 @@ const removeProduct = async (req, res) => {
 
 const singleProduct = async (req, res) => {
   try {
-    const { id } = req.body;
+    const id = req.body?.id || req.query?.id || req.params?.id;
+
+    if (!id) {
+      return res.status(400).json({ success: false, msg: "Product id is required" });
+    }
+
     const product = await Product.findById(id);
 
     if (!product) {

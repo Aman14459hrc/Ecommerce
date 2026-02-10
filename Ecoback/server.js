@@ -11,11 +11,12 @@ conectDB();
 connectCloudinary();
 
 const app = express();
-app.use(cors())
+app.use(cors({ origin: process.env.FRONTEND_URL?.split(',') || '*' }))
 app.use(express.json());
 
 // Routes
 app.use('/api/products', productRouter);
+app.use('/api/product', productRouter); // backwards compatibility for old frontend routes
 app.use('/api/users', userRouter);
 
 app.get("/", (req, res) => {
